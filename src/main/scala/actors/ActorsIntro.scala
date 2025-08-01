@@ -15,7 +15,7 @@ object ActorsIntro {
 
   def demoSimpleActor(): Unit = {
     // part 2 instantiate the actor
-    val actorSystem = ActorSystem(simpleActorV2(), "FirstActorSystem")
+    val actorSystem = ActorSystem(Person(), "FirstActorSystem")
 
     // part 3 communicate with the actor
     // Note: message should be the same type as simpleActorBehavior expects Behavior[String]
@@ -42,6 +42,23 @@ object ActorsIntro {
       // do something
       context.log.info(s"[simpleActorV2] Received message: $message")
       Behaviors.same
+    }
+  }
+
+  object Person {
+    def happy(): Behavior[String] = Behaviors.receive { (context, message) =>
+      context.log.info(s"I've received '$message'. That's great!'")
+      Behaviors.same
+    }
+
+    def sad(): Behavior[String] = Behaviors.receive { (context, message) =>
+      context.log.info(s"I've received '$message'. That's sucks!'")
+      Behaviors.same
+    }
+
+    def apply(): Behavior[String] = {
+      // You can choose the initial behavior here
+      happy()
     }
   }
 
