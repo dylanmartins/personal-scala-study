@@ -1,0 +1,51 @@
+package actors
+
+import org.apache.pekko.actor.typed.{ActorSystem, Behavior}
+import org.apache.pekko.actor.typed.scaladsl.Behaviors
+
+object ActorsIntro {
+
+  val simpleActorBehavior: Behavior[String] = Behaviors.receive { (context, message) =>
+    // do something
+    println(s"Received message: $message")
+
+    // new behavior for the NEXT message
+    Behaviors.same
+  }
+
+  def demoSimpleActor(): Unit = {
+    // part 2 instantiate the actor
+    val actorSystem = ActorSystem(simpleActorV2(), "FirstActorSystem")
+
+    // part 3 communicate with the actor
+    // Note: message should be the same type as simpleActorBehavior expects Behavior[String]
+    actorSystem ! "Hello, Actor!" // async
+
+    // part 4 shut down the actor system
+    Thread.sleep(1000) // wait for the actor to process the message
+    actorSystem.terminate()
+  }
+
+  // "Refactor"
+  object simpleActorRefactored {
+    def apply(): Behavior[String] = Behaviors.receiveMessage { (message: String) =>
+      // do something
+      println(s"Received message: $message")
+
+      // new behavior for the NEXT message
+      Behaviors.same
+    }
+  }
+
+  object simpleActorV2 {
+    def apply(): Behavior[String] = Behaviors.receive { (context, message) =>
+      // do something
+      context.log.info(s"[simpleActorV2] Received message: $message")
+      Behaviors.same
+    }
+  }
+
+  def main(args: Array[String]): Unit = {
+    demoSimpleActor()
+  }
+}
