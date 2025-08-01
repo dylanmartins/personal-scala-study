@@ -90,8 +90,54 @@ object ActorsIntro {
     actorSystem.terminate()
   }
 
+  object WeirdActor {
+    def apply(): Behavior[Any] = Behaviors.receive { (context, message) =>
+      message match {
+        case msg: String =>
+          context.log.info(s"[WeirdActor] Received String message: $msg")
+        case number: Int =>
+          context.log.info(s"[WeirdActor] Received Int message: $number")
+        case _ =>
+          context.log.info(s"[WeirdActor] Received unknown message type: ${message.getClass.getSimpleName}")
+      }
+      Behaviors.same
+    }
+  }
+
+  // Add wrapper type and type hierarchy
+  object BetterActor {
+    trait Message
+    case class StringMessage(msg: String) extends Message
+    case class IntMessage(number: Int) extends Message
+
+    def apply(): Behavior[Message] = Behaviors.receive { (context, message) =>
+      message match {
+        case msg: StringMessage =>
+          context.log.info(s"[WeirdActor] Received String message: $msg")
+        case number: IntMessage =>
+          context.log.info(s"[WeirdActor] Received Int message: $number")
+      }
+      Behaviors.same
+    }
+  }
+
+  def demoWeirdActor(): Unit = {
+    import actors.ActorsIntro.BetterActor.*
+
+    val actorSystem = ActorSystem(BetterActor(), "WeirdActorSystem")
+
+    // Send different types of messages to the WeirdActor
+    actorSystem ! StringMessage("Hello, Weird Actor!")
+    actorSystem ! IntMessage(42)
+//    actorSystem ! 3.14 // doesn't work, as the actor expects Message type
+
+    Thread.sleep(1000) // wait for the actor to process the messages
+    actorSystem.terminate()
+  }
+
   def main(args: Array[String]): Unit = {
 //    demoSimpleActor()
-    testPerson()
+//    testPerson()
+    demoWeirdActor()
   }
 }
